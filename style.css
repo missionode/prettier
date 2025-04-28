@@ -33,7 +33,8 @@ video, canvas {
   right: 0;
   margin-left: auto;
   margin-right: auto;
-  width: 600px;
+  width: 100%;
+  max-width: 420px;
   height: auto;
   opacity: 0.5;
 }

@@ -1,6 +1,6 @@
 // Initialize Face Detection
 async function initializeFaceDetection() {
-  await faceapi.nets.tinyFaceDetector.loadFromUri('/models');
+  await faceapi.nets.tinyFaceDetector.loadFromUri('../models');
   const video = document.getElementById('video');
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => video.srcObject = stream)

@@ -21,14 +21,14 @@ video, canvas {
   display: block;
   margin: 10px auto;
   width: 320px;
-  height: 400px;
-  background: #ccc;
+  height: 420px;
+  background: #ffffff;
   border-radius: 8px;
 }
 
 .camera-meter  img {
   position: absolute;
-  top: 100px;
+  top: 95px;
   left: 0;
   right: 0;
   margin-left: auto;

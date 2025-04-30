@@ -1,0 +1,77 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skin Toner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6e44ff, #b478f1);
+  transition: background 3s ease;
+  animation: gradientShift 60s infinite alternate;
+}
+
+h1 {
+  color: white;
+  font-size: 3rem;
+  z-index: 2;
+  position: absolute;
+}
+
+.button-container {
+  position: absolute;
+  bottom: 40px;
+  display: none;
+  z-index: 2;
+}
+
+.test-button {
+  padding: 12px 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1rem;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.test-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes gradientShift {
+  0%   { background: linear-gradient(135deg, #6e44ff, #b478f1); }
+  20%  { background: linear-gradient(135deg, #a27ffb, #7c5fe8); }
+  40%  { background: linear-gradient(135deg, #c39eff, #9164ff); }
+  60%  { background: linear-gradient(135deg, #d9b2ff, #976cff); }
+  80%  { background: linear-gradient(135deg, #bd8dfb, #875aff); }
+  100% { background: linear-gradient(135deg, #6e44ff, #b478f1); }
+}
+
+  </style>
+</head>
+<body>
+  <h1>Skin Toner</h1>
+  <div class="button-container">
+    <a href="#" class="test-button">Test Improvement</a>
+  </div>  <script>
+    setTimeout(() => {
+      document.querySelector('.button-container').style.display = 'block';
+    }, 60000); // show button after 1 minute
+  </script></body>
+</html>

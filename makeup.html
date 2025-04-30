@@ -1,0 +1,190 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skin Toner</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: linear-gradient(135deg, #6e44ff, #b478f1);
+  transition: background 3s ease;
+  animation: gradientShift 10s infinite alternate;
+  flex-direction: column;
+}
+
+h1 {
+  color: #fbe5ba;
+  font-size: 3rem;
+  z-index: 2;
+  /* position: absolute; */
+}
+
+.button-container {
+  position: absolute;
+  bottom: 40px;
+  display: none;
+  z-index: 2;
+}
+
+.test-button {
+  padding: 12px 24px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  font-size: 1rem;
+  border-radius: 25px;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+p {
+  color: white;
+  font-size: 7px;
+}
+
+.test-button:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes gradientShift {
+  0%   { background: linear-gradient(135deg, #6e44ff, #b478f1); }
+  5%   { background: linear-gradient(135deg, #a27ffb, #7c5fe8); }
+  10%  { background: linear-gradient(135deg, #c39eff, #9164ff); }
+  15%  { background: linear-gradient(135deg, #d9b2ff, #976cff); }
+  20%  { background: linear-gradient(135deg, #bd8dfb, #875aff); }
+  25%  { background: linear-gradient(135deg, #8f71ff, #caa3ff); }
+  30%  { background: linear-gradient(135deg, #a480ff, #8b5aff); }
+  35%  { background: linear-gradient(135deg, #b28fff, #6c3dff); }
+  40%  { background: linear-gradient(135deg, #d0b3ff, #7d60ff); }
+  45%  { background: linear-gradient(135deg, #bb8aff, #915eff); }
+  50%  { background: linear-gradient(135deg, #925eff, #c599ff); }
+  55%  { background: linear-gradient(135deg, #b377ff, #885eff); }
+  60%  { background: linear-gradient(135deg, #a57bff, #6441ff); }
+  65%  { background: linear-gradient(135deg, #d2b6ff, #784fff); }
+  70%  { background: linear-gradient(135deg, #c698ff, #9a65ff); }
+  75%  { background: linear-gradient(135deg, #ae7aff, #8461ff); }
+  80%  { background: linear-gradient(135deg, #9b5dff, #c58dff); }
+  85%  { background: linear-gradient(135deg, #b07eff, #a76bff); }
+  90%  { background: linear-gradient(135deg, #c89fff, #7852ff); }
+  95%  { background: linear-gradient(135deg, #d8bbff, #8c66ff); }
+  100% { background: linear-gradient(135deg, #6e44ff, #b478f1); }
+}
+span {
+  font-weight: bold;
+  font-size: 40px;
+}
+span:last-child {
+  float: right;
+  position: relative;
+  top: 30px;
+  right: 100px;
+}
+  </style>
+</head>
+<body>
+  <h1>Hey Beautiful</h1>
+  <p class="instructions" style="font-size: 14px; max-width: 69%; margin-top:69px; max-width: 420px; line-height: 25px; text-align: center;">
+    As you read this, your melanin levels are shifting, and your DNA is quietly evolving. keep reading ...
+  </p>
+
+
+  <p style=" margin-top:69px; max-width: 90%; line-height: 25px; text-align: center; font-size: 18px; font-weight: 200;">
+    <span>"</span>
+    You are a person of grace and elegance. Your calm and respectful nature leaves a positive impression on everyone around you. You approach challenges 
+    with thoughtfulness and intelligence, always making a difference. Your kindness and honesty shine through in everything you do, making you 
+    someone people admire and respect.
+    <span>"</span>
+  </p>
+
+  <p class="instructions" style="font-size: 14px; max-width: 69%; margin-top:69px; max-width: 420px; line-height: 25px; text-align: center;">
+    The flashing lights are signaling your brain to regulate melanin more efficiently
+  </p>
+  <div class="button-container">
+    <a style="text-decoration: none;" href="evaluate.html" class="test-button">Test Improvement</a>
+  </div>  <script>
+    setTimeout(() => {
+      document.querySelector('.button-container').style.display = 'block';
+    }, 120000); // show button after 1 minute
+
+    setTimeout(() => {
+      document.querySelector('.instructions').style.display = 'none';
+    }, 60000); // show button after 1 minute
+  </script>
+  
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body {
+      margin: 0;
+      padding-bottom: 60px; /* Space for bottom nav */
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .nav-item.active,
+    .nav-item:hover {
+      color: #1a73e8;
+    }
+  </style>
+  <div class="bottom-nav">
+    <a href="makeup.html" class="nav-item active">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      Make up
+    </a>
+    <a href="fatcheck.html" class="nav-item">
+      <i class="fa-solid fa-person"></i>
+      Fat Check
+    </a>
+    <a href="skintonecheck.html" class="nav-item">
+      <i class="fas fa-palette"></i>
+      Skin Tone
+    </a>
+  </div>
+
+</body>
+</html>

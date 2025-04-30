@@ -1,0 +1,31 @@
+{
+    "name": "Life Style Buddy",
+    "short_name": "NuYou",
+    "display": "standalone",
+    "start_url": "./?utm_source=pwa_install&private=true",
+    "scope": ".",
+    "theme_color": "#0d012a",
+    "background_color": "#0d012a",
+    "icons": [
+    {
+      "src": "images/android-chrome-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "images//android-chrome-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+    "dir": "auto",
+    "lang": "en",
+    "orientation": "portrait-primary",
+    "categories": [
+      "beauty",
+      "entertainment",
+      "fitness",
+      "health",
+      "security"
+    ]
+  }

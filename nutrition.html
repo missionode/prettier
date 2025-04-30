@@ -5,6 +5,144 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Nutrition Boost Menu</title>
   <link rel="stylesheet" href="styles.css">
+
+  <style>
+    body {
+  font-family: 'Arial', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f7f6; /* Light, airy background */
+  color: #333; /* Dark, readable text */
+  line-height: 1.6;
+}
+
+header {
+  background-color: #5cb85c; /* Vibrant green header */
+  color: white;
+  padding: 2rem 0;
+  text-align: center;
+  margin-bottom: 2rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+header h1 {
+  font-size: 2.5rem;
+  margin: 0;
+  letter-spacing: 1px;
+}
+
+.menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Responsive grid */
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.meal {
+  background-color: white;
+  padding: 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s ease-in-out; /* Subtle hover effect */
+}
+
+.meal:hover {
+  transform: translateY(-5px);
+}
+
+.meal h2 {
+  color: #337ab7; /* Distinct heading color */
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.8rem;
+}
+
+.meal ul {
+  list-style: none;
+  padding: 0;
+}
+
+.meal li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eee; /* Light dividers for list items */
+}
+
+.meal li:last-child {
+  border-bottom: none;
+}
+
+.bonus {
+  background-color: #f9f9f9;
+  padding: 1.5rem;
+  text-align: center;
+  margin: 2rem auto;
+  max-width: 800px;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.bonus h2 {
+  color: #d9534f; /* Attention-grabbing color for bonus */
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  font-size: 1.5rem;
+}
+
+.bonus p {
+  color: #666;
+  font-style: italic;
+}
+
+/* Subtle star animation in the header */
+header h1::before,
+header h1::after {
+  content: '🌟';
+  display: inline-block;
+  margin: 0 0.5rem;
+  animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+  from {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  to {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 600px) {
+  header h1 {
+    font-size: 2rem;
+  }
+
+  .menu {
+    grid-template-columns: 1fr; /* Stack meals on smaller screens */
+    padding: 1rem;
+  }
+
+  .meal {
+    padding: 1rem;
+  }
+
+  .meal h2 {
+    font-size: 1.6rem;
+  }
+
+  .bonus {
+    padding: 1rem;
+  }
+
+  .bonus h2 {
+    font-size: 1.3rem;
+  }
+}
+  </style>
 </head>
 <body>
 
@@ -17,8 +155,11 @@
       <h2>🥗 Morning Shine</h2>
       <ul>
         <li>Glow Smoothie (Mango + Spinach + Chia)</li>
+        <li>Upma / Poha / fresh-cut fruits</li>
         <li>Overnight Oats with almond milk + berries</li>
+        <li>Vegetable Dalia / Besan Cheela / spiced buttermilk</li>
         <li>Turmeric Honey Shot for inflammation control</li>
+        <li>Idli / Chutney / fresh coconut water</li>
       </ul>
     </div>
 
@@ -26,8 +167,13 @@
       <h2>🍴 Midday Energy</h2>
       <ul>
         <li>Avocado Toast with pumpkin seeds</li>
+        <li>Rajma Chawal (Kidney Bean Curry with Rice</li>
         <li>Quinoa Salad with lemon dressing</li>
+        <li>Vegetable Raita</li>
+        <li>Vegetable Biryani with Raita and Pickle</li>
         <li>Grilled Sweet Potato Wedges</li>
+        <li>Pulav with Plain Yogurt</li>
+        <li>Green Salad</li>
       </ul>
     </div>
 
@@ -35,8 +181,13 @@
       <h2>🍵 Evening Lightness</h2>
       <ul>
         <li>Steamed Veggies + Olive Oil drizzle</li>
+        <li>Plain Yogurt </li>
         <li>Lentil Soup with cumin</li>
+        <li>Vegetable Stew</li>
         <li>Chamomile Tea for relaxation</li>
+        <li>Whole Wheat Roti (Chapati)</li>
+        <li>Cucumber and Tomato Raita with Spiced Yogurt Ric</li>
+        <li>Steamed / Boiled  Vegetables butter sauteed</li>
       </ul>
     </div>
 
@@ -54,6 +205,67 @@
     <h2>Bonus Tip:</h2>
     <p>Add flax seeds, collagen powder, and fresh coconut water anywhere!</p>
   </section>
+
+
+
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+
+  <style>
+    body {
+      margin: 0;
+      padding-bottom: 60px; /* Space for bottom nav */
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      height: 60px;
+      background: #ffffff;
+      border-top: 1px solid #ddd;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+      z-index: 10;
+    }
+
+    .nav-item {
+      flex: 1;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+
+    .nav-item i {
+      font-size: 20px;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .nav-item.active,
+    .nav-item:hover {
+      color: #1a73e8;
+    }
+  </style>
+  <div class="bottom-nav">
+    <a href="makeup.html" class="nav-item active">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      Make up
+    </a>
+    <a href="fatcheck.html" class="nav-item">
+      <i class="fa-solid fa-person"></i>
+      Fat Check
+    </a>
+x      <i class="fas fa-palette"></i>
+      Skin Tone
+    </a>
+  </div>
 
 </body>
 </html>

@@ -6,6 +6,7 @@ body {
   align-items: center;
   min-height: 100vh;
   margin: 0;
+  padding-bottom: 100px;
 }
 
 .container {
@@ -36,7 +37,7 @@ video, canvas {
   width: 100%;
   max-width: 440px;
   height: auto;
-  opacity: 0.7;
+  opacity: 0.2;
 }
 
 #scanButton {
@@ -94,10 +95,11 @@ header {
 h1 {
   font-size: 2em;
   color: #008080;
+  text-transform: capitalize;
 }
 
 h2, h3 {
-  font-size: 1em;
+  font-size: 1.2em;
   margin-top: 20px;
   font-weight:100;
   color: #006666;
@@ -232,3 +234,5 @@ ul li {
     text-decoration: none;
     color: white;
 }
+
+

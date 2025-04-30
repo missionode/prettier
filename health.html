@@ -3,13 +3,77 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Face Fat Estimator</title>
+  <title>Fat Estimator</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    video, canvas { width: 300px; height: auto; margin-top: 10px; }
-    #result { font-size: 20px; margin-top: 15px; }
-    select, input, button { margin: 5px; padding: 8px; font-size: 16px; }
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: #f5f7fa;
+        color: #333;
+        text-align: center;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        align-content: center;
+        align-items: center;
+    }
+  
+    h1 {
+      color: #1a73e8;
+      margin-bottom: 20px;
+    }
+  
+    label {
+      font-weight: bold;
+      font-size: 18px;
+    }
+  
+    select, input, button {
+      margin: 8px;
+      padding: 10px 14px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+  
+    button {
+      background-color: #1a73e8;
+      color: white;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease-in-out;
+    }
+  
+    button:hover {
+      background-color: #155ab6;
+    }
+  
+    video, canvas {
+      width: 320px;
+      height: auto;
+      margin-top: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+  
+    #result {
+      margin-top: 20px;
+      font-size: 18px;
+      padding: 15px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      width: 80%;
+      max-width: 400px;
+      margin-left: auto;
+      margin-right: auto;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    }
+  
+    i {
+      color: #555;
+    }
   </style>
+  
 </head>
 <body>
 
@@ -21,7 +85,7 @@
     <option value="cm">cm</option>
     <option value="feet">feet</option>
   </select>
-  <br/>
+ 
   <button onclick="startCamera()">Start Scan</button>
   
   <video id="video" autoplay muted playsinline></video>
@@ -80,30 +144,40 @@
     function distance(a, b) {
       return Math.hypot(a.x - b.x, a.y - b.y);
     }
-
     function onResults(results, heightCm) {
-      if (!results.multiFaceLandmarks.length) return;
+  if (!results.multiFaceLandmarks.length) return;
 
-      const landmarks = results.multiFaceLandmarks[0];
-      const leftJaw = landmarks[234];
-      const rightJaw = landmarks[454];
-      const chin = landmarks[152];
-      const forehead = landmarks[10];
+  const landmarks = results.multiFaceLandmarks[0];
+  const leftJaw = landmarks[234];
+  const rightJaw = landmarks[454];
+  const chin = landmarks[152];
+  const forehead = landmarks[10];
 
-      const faceWidth = distance(leftJaw, rightJaw);
-      const faceHeight = distance(forehead, chin);
-      const ratio = faceWidth / faceHeight;
+  const faceWidth = distance(leftJaw, rightJaw);
+  const faceHeight = distance(forehead, chin);
+  const ratio = faceWidth / faceHeight;
 
-      let fatLevel = "Unknown";
-      if (ratio > 0.85) fatLevel = "High Fat";
-      else if (ratio > 0.75) fatLevel = "Medium Fat";
-      else fatLevel = "Low Fat";
+  let fatLevel = "Unknown";
+  let advice = "";
 
-      resultDiv.innerHTML = `Estimated Fat Level: <b>${fatLevel}</b><br>
-        (Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm)`;
+  if (ratio > 0.85) {
+    fatLevel = "High Fat";
+    advice = "Consider adjusting your diet and doing regular cardio. Track visible facial bloating.";
+  } else if (ratio > 0.75) {
+    fatLevel = "Medium Fat";
+    advice = "You're in a moderate range. Focus on hydration and balanced eating to refine your look.";
+  } else {
+    fatLevel = "Low Fat";
+    advice = "Great! Your facial structure shows low fat levels. Maintain your current habits.";
+  }
 
-      camera.stop();
-    }
+  resultDiv.innerHTML = `Estimated Fat Level: <b>${fatLevel}</b><br>
+    (Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm)<br><br>
+    <i>Advice:</i> ${advice}`;
+
+  camera.stop();
+}
+
   </script>
 </body>
 </html>

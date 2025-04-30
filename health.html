@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Face Fat Estimator</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    video, canvas { width: 300px; height: auto; margin-top: 10px; }
+    #result { font-size: 20px; margin-top: 15px; }
+    select, input, button { margin: 5px; padding: 8px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+  <h1>Face Fat Estimator</h1>
+
+  <label>Enter your height:</label><br>
+  <input type="number" id="heightInput" placeholder="e.g. 170 or 5.7" step="any" />
+  <select id="unitSelect">
+    <option value="cm">cm</option>
+    <option value="feet">feet</option>
+  </select>
+  <br/>
+  <button onclick="startCamera()">Start Scan</button>
+  
+  <video id="video" autoplay muted playsinline></video>
+  <canvas id="canvas" hidden></canvas>
+  <div id="result"></div>
+
+  <!-- FaceMesh library -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  <!-- Camera utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+  <script>
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const resultDiv = document.getElementById('result');
+    const heightInput = document.getElementById('heightInput');
+    const unitSelect = document.getElementById('unitSelect');
+
+    let camera;
+
+    function startCamera() {
+      if (!heightInput.value) {
+        alert("Please enter your height.");
+        return;
+      }
+
+      const heightRaw = parseFloat(heightInput.value);
+      const unit = unitSelect.value;
+      const heightCm = unit === "feet" ? heightRaw * 30.48 : heightRaw;
+
+      const faceMesh = new FaceMesh({
+        locateFile: (file) =>
+          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
+      });
+
+      faceMesh.setOptions({
+        maxNumFaces: 1,
+        refineLandmarks: true,
+        minDetectionConfidence: 0.5,
+        minTrackingConfidence: 0.5,
+      });
+
+      faceMesh.onResults((results) => onResults(results, heightCm));
+
+      camera = new Camera(video, {
+        onFrame: async () => {
+          await faceMesh.send({ image: video });
+        },
+        width: 300,
+        height: 300,
+      });
+
+      camera.start();
+    }
+
+    function distance(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function onResults(results, heightCm) {
+      if (!results.multiFaceLandmarks.length) return;
+
+      const landmarks = results.multiFaceLandmarks[0];
+      const leftJaw = landmarks[234];
+      const rightJaw = landmarks[454];
+      const chin = landmarks[152];
+      const forehead = landmarks[10];
+
+      const faceWidth = distance(leftJaw, rightJaw);
+      const faceHeight = distance(forehead, chin);
+      const ratio = faceWidth / faceHeight;
+
+      let fatLevel = "Unknown";
+      if (ratio > 0.85) fatLevel = "High Fat";
+      else if (ratio > 0.75) fatLevel = "Medium Fat";
+      else fatLevel = "Low Fat";
+
+      resultDiv.innerHTML = `Estimated Fat Level: <b>${fatLevel}</b><br>
+        (Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm)`;
+
+      camera.stop();
+    }
+  </script>
+</body>
+</html>

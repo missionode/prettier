@@ -43,14 +43,28 @@ function analyzeSkinTone(faceCanvas) {
   let total = [0, 0, 0], count = 0;
 
   for (let i = 0; i < data.length; i += 4) {
-    const [l, a, b] = rgbToLab(data[i]/255, data[i+1]/255, data[i+2]/255);
-    if (l > 30 && l < 70) { // Midtone range
-      total[0] += l; total[1] += a; total[2] += b;
+    const r = data[i] / 255;
+    const g = data[i + 1] / 255;
+    const b = data[i + 2] / 255;
+
+    const [l, a, bLab] = rgbToLab(r, g, b);
+
+    // Exclude extreme darks/lights and non-skin chroma values (hair/eyebrows etc.)
+    if (
+      l > 40 && l < 75 &&        // Skip very dark/light
+      a > 5 && a < 25 &&         // Remove bluish/greenish
+      bLab > 5 && bLab < 30      // Remove extreme yellow/blues
+    ) {
+      total[0] += l;
+      total[1] += a;
+      total[2] += bLab;
       count++;
     }
   }
+
   return count ? total.map(c => c / count) : null;
 }
+
 
 // Calculate Color Match %
 function calculateMatch(userLab, targetLab) {

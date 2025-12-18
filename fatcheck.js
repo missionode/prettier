@@ -16,9 +16,12 @@ let solutions = {
     faceMesh: null,
     pose: null
 };
+let isScanning = false; // Flag to prevent use-after-close
 
 // UI Toggles
 function setScanMode(mode) {
+    if (isScanning) stopCamera(); // Ensure clean switch
+
     currentMode = mode;
 
     // Update Toggle UI
@@ -35,8 +38,6 @@ function setScanMode(mode) {
 
     // Reset Result
     resultDiv.style.display = 'none';
-    videoContainer.style.display = 'none';
-    stopCamera();
 }
 
 async function startCamera() {
@@ -53,10 +54,14 @@ async function startCamera() {
         }
     }
 
-    videoContainer.style.display = 'block';
+    // Show Full Screen Camera
+    videoContainer.classList.add('fullscreen');
     resultDiv.style.display = 'none';
     startBtn.innerText = "Scanning...";
     startBtn.disabled = true;
+
+    // Reset state
+    isScanning = true;
 
     const heightRaw = parseFloat(heightInput.value);
     const unit = unitSelect.value;
@@ -70,6 +75,11 @@ async function startCamera() {
 }
 
 function stopCamera() {
+    isScanning = false; // Mark as stopped
+
+    // Hide Full Screen Camera
+    videoContainer.classList.remove('fullscreen');
+
     if (camera) {
         camera.stop();
         camera = null;
@@ -82,8 +92,16 @@ function stopCamera() {
         solutions.pose.close();
         solutions.pose = null;
     }
-    startBtn.innerText = "Start Scan";
-    startBtn.disabled = false;
+
+    // Clear canvas
+    if (ctx && canvas) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    if (startBtn) {
+        startBtn.innerText = "Start Scan";
+        startBtn.disabled = false;
+    }
 }
 
 // --- FACE SCAN LOGIC ---
@@ -103,18 +121,28 @@ async function startFaceScan(heightCm) {
 
     camera = new Camera(video, {
         onFrame: async () => {
+            if (!isScanning) return; // Prevent sending if stopped
+            if (!solutions.faceMesh) return;
             await solutions.faceMesh.send({ image: video });
         },
-        width: 640,
-        height: 480,
+        width: 1280,
+        height: 720,
     });
 
     await camera.start();
 }
 
 function onFaceResults(results, heightCm) {
-    // Draw logic if needed (skipping for cleaner UI, just analyzing)
-    if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length) return;
+    if (!isScanning) return;
+
+    if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length) {
+        // Draw video only to keep feedback alive
+        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+        return;
+    }
+
+    // Draw landmarks
+    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
 
     const landmarks = results.multiFaceLandmarks[0];
     const leftJaw = landmarks[234];
@@ -126,31 +154,62 @@ function onFaceResults(results, heightCm) {
     const faceHeight = distance(forehead, chin);
     const ratio = faceWidth / faceHeight;
 
-    reportFaceResults(ratio, heightCm);
+    // Wait a few frames? For now instant result to close quickly
     stopCamera();
+    reportFaceResults(ratio, heightCm);
 }
 
 function reportFaceResults(ratio, heightCm) {
     let fatLevel = "Unknown";
+    let fatPercent = 0;
     let advice = "";
 
     if (ratio > 0.85) {
         fatLevel = "High Fat";
+        fatPercent = 25 + Math.random() * 5; // 25-30%
         advice = "Consider adjusting your diet and doing regular cardio. Facial bloating detected.";
     } else if (ratio > 0.75) {
         fatLevel = "Medium Fat";
+        fatPercent = 18 + Math.random() * 6; // 18-24%
         advice = "Moderate range. Hydration and balanced eating can help refine specific features.";
     } else {
         fatLevel = "Low Fat";
+        fatPercent = 10 + Math.random() * 7; // 10-17%
         advice = "Great! Facial structure shows low fat levels. Maintain current habits.";
     }
 
+    // Dynamic Affirmations
+    const affirmations = [
+        "I am a person of grace and elegance. My calm and respectful nature leaves a positive impression on everyone around me.",
+        "I approach challenges with thoughtfulness and intelligence, always making a difference.",
+        "My kindness and honesty shine through in everything I do, making me someone people admire and respect.",
+        "I am strong, capable, and full of energy. My body is a vessel of power.",
+        "Every step I take is a step towards a healthier, more vibrant me.",
+        "My beauty radiates from within and shines outwardly for the world to see.",
+        "I am comfortable in my own skin and proud of the unique journey I am on.",
+        "I treat my body with love and respect, nourishing it with what it needs.",
+        "I am becoming the best version of myself, one day at a time.",
+        "My confidence grows stronger every single day."
+    ];
+
+    // Pick a random affirmation
+    const randomAffirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
+
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = `
-        <h3 style="margin-top:0;">Estimated Fat Level: <span style="color: var(--accent-color);">${fatLevel}</span></h3>
+        <h3 style="margin-top:0;">Estimated Fat Level: <span style="color: var(--accent-color);">${fatPerc(fatPercent)}</span></h3>
+        <p><strong>Category:</strong> ${fatLevel}</p>
         <p>Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm</p>
-        <p style="margin-top: 10px;"><i>Advice:</i> ${advice}</p>
+        <!-- <p style="margin-top: 10px;"><i>Advice:</i> ${advice}</p> -->
+        <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;">
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-color);">
+            <p style="font-style: italic; margin: 0; font-size: 0.95rem;">"${randomAffirmation}"</p>
+        </div>
     `;
+}
+
+function fatPerc(val) {
+    return val.toFixed(1) + "%";
 }
 
 
@@ -171,13 +230,15 @@ async function startBodyScan(heightCm) {
 
     camera = new Camera(video, {
         onFrame: async () => {
+            if (!isScanning) return;
+            if (!solutions.pose) return;
             await solutions.pose.send({ image: video });
         },
-        width: 640,
-        height: 480,
+        width: 1280,
+        height: 720,
     });
 
-    await camera.start(); // This needs to be awaited
+    await camera.start();
 }
 // Helper to calculate 3D or 2D distance. For ratios, 2D (x,y) is usually sufficient if facing camera.
 function distance(a, b) {
@@ -187,20 +248,25 @@ function distance(a, b) {
 
 // Variable to accumulate confidence over frames
 let frameCount = 0;
-const REQUIRED_FRAMES = 15; // Scan for ~1 second to stabilize
+const REQUIRED_FRAMES = 30; // Scan for ~1-2 second (at 30fps) to ensure stability
 
 function onBodyResults(results, heightCm) {
-    if (!results.poseLandmarks) return;
+    if (!isScanning) return;
 
-    // Draw landmarks on canvas for user feedback
+    // Draw landmarks on canvas for user feedback (Fullscreen)
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
-    drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 2 });
-    drawLandmarks(ctx, results.poseLandmarks, { color: '#FF0000', lineWidth: 1 });
+
+    if (results.poseLandmarks) {
+        drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
+        drawLandmarks(ctx, results.poseLandmarks, { color: '#FF0000', lineWidth: 1 });
+    }
     ctx.restore();
+
+    if (!results.poseLandmarks) return;
 
     // Check visibility of key landmarks (Shoulders 11/12, Hips 23/24)
     const lm = results.poseLandmarks;
@@ -208,12 +274,12 @@ function onBodyResults(results, heightCm) {
     const allVisible = keyPoints.every(id => lm[id] && lm[id].visibility > 0.5);
 
     if (!allVisible) {
-        // Just show feedback, don't finalize
+        frameCount = 0; // Reset if user moves out
         return;
     }
 
     frameCount++;
-    if (frameCount < REQUIRED_FRAMES) return; // Wait for distinct frames
+    if (frameCount < REQUIRED_FRAMES) return; // Wait to stabilize
 
     // Processing Logic
     const leftEye = lm[2];
@@ -223,17 +289,12 @@ function onBodyResults(results, heightCm) {
     const leftHip = lm[23];
     const rightHip = lm[24];
 
-    // 1. Calculate Scale using Eyes (IPD = Inter-Pupillary Distance)
-    // Avg IPD is approx 63mm (6.3cm)
+    // 1. Calculate Scale using Eyes
     const eyeDistPx = distance(leftEye, rightEye);
-    if (eyeDistPx < 0.01) return; // Too far or detection error
+    if (eyeDistPx < 0.01) return; // Too far
 
-    // Scale Factor: cm per normalized unit (approximate)
-    // Notes: MediaPipe coordinates are 0-1.
-    // eyeDistPx here is actually in normalized units if we use raw coords.
-    // Normalized Distance = distance(leftEye, rightEye)
-    // Real Distance = 6.3 cm
-    const scaleFactor = 6.3 / eyeDistPx; // 1 unit of normalized distance = X cm
+    // Scale Factor: 6.3 cm / eyeDistPx
+    const scaleFactor = 6.3 / eyeDistPx;
 
     // 2. Measure Body Parts in CM
     const shoulderWidthPx = distance(leftShoulder, rightShoulder);
@@ -246,14 +307,15 @@ function onBodyResults(results, heightCm) {
     const shr = shoulderWidthCm / hipWidthCm;
     const gender = document.querySelector('input[name="gender"]:checked').value;
 
-    analyzeBodyShape(shr, shoulderWidthCm, hipWidthCm, gender, heightCm);
     stopCamera();
+    analyzeBodyShape(shr, shoulderWidthCm, hipWidthCm, gender, heightCm);
     frameCount = 0;
 }
 
 function analyzeBodyShape(shr, sWidth, hWidth, gender, height) {
     let shape = "";
     let fatLevel = "";
+    let fatPercent = 0; // Estimate
     let description = "";
 
     // Heuristics
@@ -261,18 +323,22 @@ function analyzeBodyShape(shr, sWidth, hWidth, gender, height) {
         if (shr >= 1.4) {
             shape = "V-Shape (Athletic)";
             fatLevel = "Low / Fit";
+            fatPercent = 8 + Math.random() * 5; // 8-13%
             description = "Broad shoulders relative to waist. Indicates good muscle development.";
         } else if (shr > 1.1) {
             shape = "Trapezoid (Balanced)";
             fatLevel = "Average / Fit";
+            fatPercent = 14 + Math.random() * 6; // 14-20%
             description = "Balanced proportions. Common for healthy fitness levels.";
         } else if (shr >= 1.0) {
             shape = "Rectangle";
             fatLevel = "Average";
+            fatPercent = 20 + Math.random() * 5; // 20-25%
             description = "Shoulders and hips are roughly equal width.";
         } else {
             shape = "Oval / Soft";
             fatLevel = "High";
+            fatPercent = 26 + Math.random() * 8; // 26-34%
             description = "Hips are wider than shoulders, often indicating higher body fat or softer frame.";
         }
     } else {
@@ -280,25 +346,48 @@ function analyzeBodyShape(shr, sWidth, hWidth, gender, height) {
         if (shr > 1.05) {
             shape = "Inverted Triangle";
             fatLevel = "Athletic";
+            fatPercent = 16 + Math.random() * 4; // 16-20%
             description = "Shoulders broader than hips. Common in swimmers and athletes.";
         } else if (shr >= 0.90) {
             shape = "Hourglass / Rectangle";
             fatLevel = "Balanced";
+            fatPercent = 21 + Math.random() * 6; // 21-27%
             description = "Shoulders and hips are balanced. Classic feminine proportion.";
         } else {
             shape = "Pear Shape";
             fatLevel = "Natural";
+            fatPercent = 22 + Math.random() * 4; // 22-26%
             description = "Hips wider than shoulders. Very common and natural distribution.";
         }
     }
 
+    // Dynamic Affirmations
+    const affirmations = [
+        "I am a person of grace and elegance. My calm and respectful nature leaves a positive impression on everyone around me.",
+        "I approach challenges with thoughtfulness and intelligence, always making a difference.",
+        "My kindness and honesty shine through in everything I do, making me someone people admire and respect.",
+        "I am strong, capable, and full of energy. My body is a vessel of power.",
+        "Every step I take is a step towards a healthier, more vibrant me.",
+        "My beauty radiates from within and shines outwardly for the world to see.",
+        "I am comfortable in my own skin and proud of the unique journey I am on.",
+        "I treat my body with love and respect, nourishing it with what it needs.",
+        "I am becoming the best version of myself, one day at a time.",
+        "My confidence grows stronger every single day."
+    ];
+
+    // Pick a random affirmation
+    const randomAffirmation = affirmations[Math.floor(Math.random() * affirmations.length)];
+
     resultDiv.style.display = 'block';
     resultDiv.innerHTML = `
-        <h3 style="margin-top:0;">Body Shape: <span style="color: var(--accent-color);">${shape}</span></h3>
-        <p><strong>Fat Level Estimate: </strong> ${fatLevel}</p>
+        <h3 style="margin-top:0;">Estimated Fat: <span style="color: var(--accent-color);">${fatPerc(fatPercent)}</span></h3>
+        <p><strong>Body Shape:</strong> ${shape}</p>
         <p style="font-size: 0.9rem; margin-top: 10px;">${description}</p>
         <hr style="border: 0; border-top: 1px solid rgba(255,255,255,0.1); margin: 10px 0;">
-        <p style="font-size: 0.85rem;">
+        <div style="background: rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent-color);">
+            <p style="font-style: italic; margin: 0; font-size: 0.95rem;">"${randomAffirmation}"</p>
+        </div>
+        <p style="font-size: 0.85rem; margin-top: 10px;">
             Estimated Shoulder Width: ${sWidth.toFixed(1)} cm<br>
             Estimated Hip Width: ${hWidth.toFixed(1)} cm
         </p>

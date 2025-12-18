@@ -10,6 +10,125 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Toggle Switch */
+    .toggle-container {
+      display: flex;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 25px;
+      padding: 4px;
+      margin-bottom: 20px;
+      border: 1px solid var(--glass-border);
+    }
+
+    .toggle-btn {
+      padding: 8px 20px;
+      border-radius: 20px;
+      cursor: pointer;
+      color: white;
+      transition: 0.3s;
+      flex: 1;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .toggle-btn.active {
+      background: rgba(255, 255, 255, 0.3);
+      font-weight: bold;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .gender-group {
+      display: none;
+      /* Hidden by default (for Face Scan) */
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .gender-label {
+      cursor: pointer;
+      padding: 10px 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid var(--glass-border);
+      border-radius: 8px;
+      color: white;
+      transition: 0.3s;
+    }
+
+    .gender-radio:checked+.gender-label {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: var(--accent-color);
+    }
+
+    .gender-radio {
+      display: none;
+    }
+
+    /* Full Screen Camera Overlay */
+    .media-container {
+      display: none;
+      /* Default hidden */
+    }
+
+    .media-container.fullscreen {
+      display: flex !important;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #000;
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Hide raw video, show canvas only */
+    #video {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #canvas {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .scan-overlay-text {
+      position: absolute;
+      bottom: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      color: white;
+      font-size: 1.2rem;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 10px 20px;
+      border-radius: 20px;
+      pointer-events: none;
+    }
+
+    .close-scan-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 1001;
+    }
+  </style>
 </head>
 
 <body>
@@ -18,6 +137,21 @@
     <h1>Fat Estimator</h1>
 
     <div class="glass-panel" style="width: 100%; max-width: 500px;">
+      <!-- Scan Type Toggle -->
+      <div class="toggle-container">
+        <div class="toggle-btn active" onclick="setScanMode('face')">Face Scan</div>
+        <div class="toggle-btn" onclick="setScanMode('body')">Body Scan</div>
+      </div>
+
+      <!-- Body Scan Specific: Gender Selection -->
+      <div class="gender-group" id="genderSelect">
+        <input type="radio" name="gender" id="male" value="male" class="gender-radio">
+        <label for="male" class="gender-label"><i class="fa-solid fa-mars"></i> Male</label>
+
+        <input type="radio" name="gender" id="female" value="female" class="gender-radio">
+        <label for="female" class="gender-label"><i class="fa-solid fa-venus"></i> Female</label>
+      </div>
+
       <label style="color: white; display: block; margin-bottom: 10px;">Enter your height:</label>
       <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;">
         <input type="number" id="heightInput" placeholder="e.g. 170 or 5.7" step="any"
@@ -27,12 +161,21 @@
           <option value="feet">feet</option>
         </select>
       </div>
-      <button onclick="startCamera()" class="btn-glass" style="width: 100%; margin-top: 15px;">Start Scan</button>
+
+      <p id="instructionText" style="font-size: 0.9rem; margin: 15px 0; min-height: 40px;">
+        Center your face in the camera. Ensure good lighting.
+      </p>
+
+      <button onclick="startCamera()" class="btn-glass" style="width: 100%; margin-top: 5px;" id="startBtn">Start
+        Scan</button>
     </div>
 
-    <div class="media-container" style="display: none;" id="videoContainer">
+    <!-- Full Screen Video Overlay -->
+    <div class="media-container" id="videoContainer">
+      <button class="close-scan-btn" onclick="stopCamera()"><i class="fa-solid fa-xmark"></i></button>
       <video id="video" autoplay muted playsinline></video>
-      <canvas id="canvas" hidden></canvas>
+      <canvas id="canvas"></canvas>
+      <div class="scan-overlay-text">Scaning... Hold Still</div>
     </div>
 
     <div id="result" class="glass-panel"
@@ -54,97 +197,18 @@
     </a>
   </div>
 
-  <!-- FaceMesh library -->
+  <!-- FaceMesh library (for Face Scan) -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+  <!-- Pose library (for Body Scan) -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js"></script>
   <!-- Camera utils -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <!-- Drawing utils -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js"></script>
+
   <script src="scripts.js"></script>
+  <script src="fatcheck.js"></script>
 
-  <script>
-    const video = document.getElementById('video');
-    const canvas = document.getElementById('canvas');
-    const resultDiv = document.getElementById('result');
-    const heightInput = document.getElementById('heightInput');
-    const unitSelect = document.getElementById('unitSelect');
-    const videoContainer = document.getElementById('videoContainer');
-
-    let camera;
-
-    function startCamera() {
-      if (!heightInput.value) {
-        alert("Please enter your height.");
-        return;
-      }
-
-      videoContainer.style.display = 'block';
-
-      const heightRaw = parseFloat(heightInput.value);
-      const unit = unitSelect.value;
-      const heightCm = unit === "feet" ? heightRaw * 30.48 : heightRaw;
-
-      const faceMesh = new FaceMesh({
-        locateFile: (file) =>
-          `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`,
-      });
-
-      faceMesh.setOptions({
-        maxNumFaces: 1,
-        refineLandmarks: true,
-        minDetectionConfidence: 0.5,
-        minTrackingConfidence: 0.5,
-      });
-
-      faceMesh.onResults((results) => onResults(results, heightCm));
-
-      camera = new Camera(video, {
-        onFrame: async () => {
-          await faceMesh.send({ image: video });
-        },
-        width: 300,
-        height: 300,
-      });
-
-      camera.start();
-    }
-
-    function distance(a, b) {
-      return Math.hypot(a.x - b.x, a.y - b.y);
-    }
-    function onResults(results, heightCm) {
-      if (!results.multiFaceLandmarks.length) return;
-
-      const landmarks = results.multiFaceLandmarks[0];
-      const leftJaw = landmarks[234];
-      const rightJaw = landmarks[454];
-      const chin = landmarks[152];
-      const forehead = landmarks[10];
-
-      const faceWidth = distance(leftJaw, rightJaw);
-      const faceHeight = distance(forehead, chin);
-      const ratio = faceWidth / faceHeight;
-
-      let fatLevel = "Unknown";
-      let advice = "";
-
-      if (ratio > 0.85) {
-        fatLevel = "High Fat";
-        advice = "Consider adjusting your diet and doing regular cardio. Track visible facial bloating.";
-      } else if (ratio > 0.75) {
-        fatLevel = "Medium Fat";
-        advice = "You're in a moderate range. Focus on hydration and balanced eating to refine your look.";
-      } else {
-        fatLevel = "Low Fat";
-        advice = "Great! Your facial structure shows low fat levels. Maintain your current habits.";
-      }
-
-      resultDiv.style.display = 'block';
-      resultDiv.innerHTML = `<h3 style="margin-top:0;">Estimated Fat Level: <span style="color: var(--accent-color);">${fatLevel}</span></h3>
-        <p>Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm</p>
-        <p style="margin-top: 10px;"><i>Advice:</i> ${advice}</p>`;
-
-      camera.stop();
-    }
-  </script>
 </body>
 
 </html>

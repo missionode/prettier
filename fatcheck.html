@@ -87,16 +87,22 @@
     /* Hide raw video, show canvas only */
     #video {
       position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      pointer-events: none;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      /* Fill the screen */
+      z-index: 1;
+      /* Behind canvas */
     }
 
     #canvas {
+      position: absolute;
       width: 100%;
       height: 100%;
-      object-fit: contain;
+      object-fit: cover;
+      /* Match video */
+      z-index: 2;
+      /* Overlay on top */
     }
 
     .scan-overlay-text {

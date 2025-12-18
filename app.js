@@ -1,6 +1,6 @@
 // Initialize Face Detection
 async function initializeFaceDetection() {
-  await faceapi.nets.tinyFaceDetector.loadFromUri('/prettier/models');
+  await faceapi.nets.tinyFaceDetector.loadFromUri('https://justadudewhohacks.github.io/face-api.js/models');
   const video = document.getElementById('video');
   navigator.mediaDevices.getUserMedia({ video: true })
     .then(stream => video.srcObject = stream)
@@ -31,8 +31,8 @@ function rgbToLab(r, g, b) {
   let y = r * 0.2126729 + g * 0.7151522 + b * 0.0721750;
   let z = r * 0.0193339 + g * 0.1191920 + b * 0.9503041;
 
-  [x, y, z] = [x/0.95047, y/1.00000, z/1.08883].map(c => (c > 0.008856) ? Math.cbrt(c) : (7.787 * c + 16/116));
-  
+  [x, y, z] = [x / 0.95047, y / 1.00000, z / 1.08883].map(c => (c > 0.008856) ? Math.cbrt(c) : (7.787 * c + 16 / 116));
+
   return [(116 * y) - 16, 500 * (x - y), 200 * (y - z)];
 }
 
@@ -126,7 +126,7 @@ document.querySelectorAll('.swatch').forEach(swatch => {
 
     const hex = swatch.dataset.color;
     const rgb = hexToRgb(hex);
-    TARGET_LAB = rgbToLab(rgb.r/255, rgb.g/255, rgb.b/255);
+    TARGET_LAB = rgbToLab(rgb.r / 255, rgb.g / 255, rgb.b / 255);
 
     console.log("Selected Target LAB:", TARGET_LAB);
   });

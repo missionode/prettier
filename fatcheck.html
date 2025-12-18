@@ -1,103 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/x-icon" href="images/favicon.ico">
   <link rel="manifest" href="manifest.json" />
   <title>Nuyou Your Lifestyle buddy | Fat Estimator</title>
-  <style>
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f5f7fa;
-        color: #333;
-        text-align: center;
-        padding: 30px;
-        display: flex;
-        flex-direction: column;
-        align-content: center;
-        align-items: center;
-    }
-  
-    h1 {
-      color: #1a73e8;
-      margin-bottom: 20px;
-    }
-  
-    label {
-      font-weight: bold;
-      font-size: 18px;
-    }
-  
-    select, input, button {
-      margin: 8px;
-      padding: 10px 14px;
-      font-size: 16px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-  
-    button {
-      background-color: #1a73e8;
-      color: white;
-      border: none;
-      cursor: pointer;
-      transition: background-color 0.2s ease-in-out;
-    }
-  
-    button:hover {
-      background-color: #155ab6;
-    }
-  
-    video, canvas {
-      width: 320px;
-      height: auto;
-      margin-top: 20px;
-      border-radius: 10px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-  
-    #result {
-      margin-top: 20px;
-      font-size: 18px;
-      padding: 15px;
-      background-color: #fff;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 400px;
-      margin-left: auto;
-      margin-right: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-  
-    i {
-      color: #555;
-    }
-  </style>
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-  <h1>Fat Estimator</h1>
+  <div class="container" style="flex: 1; justify-content: flex-start; padding-top: 20px;">
+    <h1>Fat Estimator</h1>
 
-  <label>Enter your height:</label><br>
-  <input type="number" id="heightInput" placeholder="e.g. 170 or 5.7" step="any" />
-  <select id="unitSelect">
-    <option value="cm">cm</option>
-    <option value="feet">feet</option>
-  </select>
- 
-  <button onclick="startCamera()">Start Scan</button>
-  
-  <video id="video" autoplay muted playsinline></video>
-  <canvas id="canvas" hidden></canvas>
-  <div id="result"></div>
+    <div class="glass-panel" style="width: 100%; max-width: 500px;">
+      <label style="color: white; display: block; margin-bottom: 10px;">Enter your height:</label>
+      <div style="display: flex; justify-content: center; align-items: center; flex-wrap: wrap;">
+        <input type="number" id="heightInput" placeholder="e.g. 170 or 5.7" step="any"
+          style="flex: 1; min-width: 150px;">
+        <select id="unitSelect" style="width: 100px;">
+          <option value="cm">cm</option>
+          <option value="feet">feet</option>
+        </select>
+      </div>
+      <button onclick="startCamera()" class="btn-glass" style="width: 100%; margin-top: 15px;">Start Scan</button>
+    </div>
+
+    <div class="media-container" style="display: none;" id="videoContainer">
+      <video id="video" autoplay muted playsinline></video>
+      <canvas id="canvas" hidden></canvas>
+    </div>
+
+    <div id="result" class="glass-panel"
+      style="display: none; margin-top: 20px; width: 100%; max-width: 500px; text-align: left;"></div>
+  </div>
+
+  <div class="bottom-nav">
+    <a href="makeup.html" class="nav-item">
+      <i class="fa-solid fa-wand-magic-sparkles"></i>
+      Make up
+    </a>
+    <a href="fatcheck.html" class="nav-item active">
+      <i class="fa-solid fa-person"></i>
+      Fat Check
+    </a>
+    <a href="skintonecheck.html" class="nav-item">
+      <i class="fas fa-palette"></i>
+      Skin Tone
+    </a>
+  </div>
 
   <!-- FaceMesh library -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
   <!-- Camera utils -->
   <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+  <script src="scripts.js"></script>
 
   <script>
     const video = document.getElementById('video');
@@ -105,6 +66,7 @@
     const resultDiv = document.getElementById('result');
     const heightInput = document.getElementById('heightInput');
     const unitSelect = document.getElementById('unitSelect');
+    const videoContainer = document.getElementById('videoContainer');
 
     let camera;
 
@@ -113,6 +75,8 @@
         alert("Please enter your height.");
         return;
       }
+
+      videoContainer.style.display = 'block';
 
       const heightRaw = parseFloat(heightInput.value);
       const unit = unitSelect.value;
@@ -147,101 +111,40 @@
       return Math.hypot(a.x - b.x, a.y - b.y);
     }
     function onResults(results, heightCm) {
-  if (!results.multiFaceLandmarks.length) return;
+      if (!results.multiFaceLandmarks.length) return;
 
-  const landmarks = results.multiFaceLandmarks[0];
-  const leftJaw = landmarks[234];
-  const rightJaw = landmarks[454];
-  const chin = landmarks[152];
-  const forehead = landmarks[10];
+      const landmarks = results.multiFaceLandmarks[0];
+      const leftJaw = landmarks[234];
+      const rightJaw = landmarks[454];
+      const chin = landmarks[152];
+      const forehead = landmarks[10];
 
-  const faceWidth = distance(leftJaw, rightJaw);
-  const faceHeight = distance(forehead, chin);
-  const ratio = faceWidth / faceHeight;
+      const faceWidth = distance(leftJaw, rightJaw);
+      const faceHeight = distance(forehead, chin);
+      const ratio = faceWidth / faceHeight;
 
-  let fatLevel = "Unknown";
-  let advice = "";
+      let fatLevel = "Unknown";
+      let advice = "";
 
-  if (ratio > 0.85) {
-    fatLevel = "High Fat";
-    advice = "Consider adjusting your diet and doing regular cardio. Track visible facial bloating.";
-  } else if (ratio > 0.75) {
-    fatLevel = "Medium Fat";
-    advice = "You're in a moderate range. Focus on hydration and balanced eating to refine your look.";
-  } else {
-    fatLevel = "Low Fat";
-    advice = "Great! Your facial structure shows low fat levels. Maintain your current habits.";
-  }
+      if (ratio > 0.85) {
+        fatLevel = "High Fat";
+        advice = "Consider adjusting your diet and doing regular cardio. Track visible facial bloating.";
+      } else if (ratio > 0.75) {
+        fatLevel = "Medium Fat";
+        advice = "You're in a moderate range. Focus on hydration and balanced eating to refine your look.";
+      } else {
+        fatLevel = "Low Fat";
+        advice = "Great! Your facial structure shows low fat levels. Maintain your current habits.";
+      }
 
-  resultDiv.innerHTML = `Estimated Fat Level: <b>${fatLevel}</b><br>
-    (Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm)<br><br>
-    <i>Advice:</i> ${advice}`;
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = `<h3 style="margin-top:0;">Estimated Fat Level: <span style="color: var(--accent-color);">${fatLevel}</span></h3>
+        <p>Face Ratio: ${ratio.toFixed(2)}, Height: ${heightCm.toFixed(1)} cm</p>
+        <p style="margin-top: 10px;"><i>Advice:</i> ${advice}</p>`;
 
-  camera.stop();
-}
-
+      camera.stop();
+    }
   </script>
-
-
-
-
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-<style>
-  body {
-    margin: 0;
-    padding-bottom: 60px; /* Space for bottom nav */
-    font-family: 'Segoe UI', sans-serif;
-  }
-
-  .bottom-nav {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    height: 60px;
-    background: #ffffff;
-    border-top: 1px solid #ddd;
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-    z-index: 10;
-  }
-
-  .nav-item {
-    flex: 1;
-    text-align: center;
-    font-size: 12px;
-    color: #666;
-    text-decoration: none;
-    transition: color 0.2s ease;
-  }
-
-  .nav-item i {
-    font-size: 20px;
-    display: block;
-    margin-bottom: 4px;
-  }
-
-  .nav-item.active,
-  .nav-item:hover {
-    color: #1a73e8;
-  }
-</style>
-<div class="bottom-nav">
-  <a href="makeup.html" class="nav-item">
-    <i class="fa-solid fa-wand-magic-sparkles"></i>
-    Make up
-  </a>
-  <a href="fatcheck.html" class="nav-item active">
-    <i class="fa-solid fa-person"></i>
-    Fat Check
-  </a>
-  <a href="skintonecheck.html" class="nav-item">
-    <i class="fas fa-palette"></i>
-    Skin Tone
-  </a>
-</div>
-
 </body>
+
 </html>

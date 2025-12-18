@@ -1,82 +1,51 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Make up station</title>
+  <title>Nuyou Your Lifestyle buddy | Skin Tone Checker</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <script defer src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
   <script defer src="app.js"></script>
 </head>
+
 <body>
-  <div class="container">
-    <h1>Face tone progress checker</h1>
-    <h3 style="margin: 20px;font-weight:bold;">Select your target skin color</h3>
-    <div style="margin: 20px auto 5px auto; display: inline-flex;" id="swatches">
-      <div class="swatch" style="background-color: #f5d7b7;" data-color="#f5d7b7"></div>
-      <div class="swatch" style="background-color: #e0ac69;" data-color="#e0ac69"></div>
-      <div class="swatch" style="background-color: #c68642;" data-color="#c68642"></div>
-      <div class="swatch" style="background-color: #8d5524;" data-color="#8d5524"></div>
+  <div class="container" style="padding-top: 20px;">
+    <h1>Face Tone Progress</h1>
+
+    <div class="glass-panel" style="width: 100%; max-width: 600px; text-align: center;">
+      <h3 style="margin-bottom: 15px;">Select your target skin color</h3>
+      <div class="swatches-container" id="swatches">
+        <div class="swatch" style="background-color: #f5d7b7;" data-color="#f5d7b7"></div>
+        <div class="swatch" style="background-color: #e0ac69;" data-color="#e0ac69"></div>
+        <div class="swatch" style="background-color: #c68642;" data-color="#c68642"></div>
+        <div class="swatch" style="background-color: #8d5524;" data-color="#8d5524"></div>
+      </div>
+      <div id="result" style="margin: 15px 0; font-weight: bold; color: var(--accent-color);"></div>
+      <p style="font-size: 0.9rem; margin-bottom: 20px;">
+        <b>Click Scan</b>. For better results use consistent lighting conditions.
+      </p>
+
+      <button class="btn-glass" onclick="scanFace()" id="scanButton">
+        <i class="fa-solid fa-camera"></i> Scan Face
+      </button>
+
+      <a id="nutritionLink" href="nutrition.html" class="btn-glass"
+        style="display:none; margin-top: 20px; background: rgba(50, 200, 100, 0.3);">
+        Need help to plan your diet?
+      </a>
     </div>
-    <div id="result"></div>
-    <p style="font: 12px; margin: 10px auto  30px; color: grey;"><b>Click Scan</b>, For better results Use the Match place and lighting conditions </p>
-    <section class="camera-meter">
+
+    <div class="media-container" style="max-width: 400px; align-self: center;">
       <video id="video" autoplay muted></video>
-      <img src="images/facescan.png" alt=" facescan image">
-    </section>
-
-    <!-- <canvas id="canvas"></canvas> -->
-    
-    <button class="btn btn-4 btn-4a icon-arrow-right" onclick="scanFace()" id="scanButton">Scan</button>
-
-    <a id="nutritionLink" href="nutrition.html" style="display:none;">Need help to plan your diet</a>
+      <img src="images/facescan.png" alt="facescan overlay"
+        style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.6; pointer-events: none;">
+    </div>
   </div>
 
-
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <style>
-    body {
-      margin: 0;
-      padding-bottom: 60px; /* Space for bottom nav */
-      font-family: 'Segoe UI', sans-serif;
-    }
-
-    .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      height: 60px;
-      background: #ffffff;
-      border-top: 1px solid #ddd;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-      z-index: 10;
-    }
-
-    .nav-item {
-      flex: 1;
-      text-align: center;
-      font-size: 12px;
-      color: #666;
-      text-decoration: none;
-      transition: color 0.2s ease;
-    }
-
-    .nav-item i {
-      font-size: 20px;
-      display: block;
-      margin-bottom: 4px;
-    }
-
-    .nav-item.active,
-    .nav-item:hover {
-      color: #1a73e8;
-    }
-  </style>
   <div class="bottom-nav">
     <a href="makeup.html" class="nav-item">
       <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -86,10 +55,14 @@
       <i class="fa-solid fa-person"></i>
       Fat Check
     </a>
-    <a href="#skin" class="nav-item active">
+    <a href="skintonecheck.html" class="nav-item active">
       <i class="fas fa-palette"></i>
       Skin Tone
     </a>
   </div>
+
+  <div id="google_translate_element"></div>
+  <script src="scripts.js"></script>
 </body>
+
 </html>

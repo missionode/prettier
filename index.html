@@ -6,47 +6,19 @@
     <link rel="manifest" href="manifest.json" />
     <link rel="icon" type="image/x-icon" href="images/favicon.ico">
     <title>Nuyou Your Lifestyle buddy</title>
-    
-    <style>
-        body {
-    margin: 0;
-    overflow: hidden; /* Prevent scrollbars during the splash screen */
-    background-color: #172040; /* Optional background color */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh; /* Ensure the container takes up the full viewport height */
-}
-
-.splash-container {
-    text-align: center; /* Center the logo horizontally */
-}
-
-.logo {
-    max-width: 80%; /* Adjust as needed for responsiveness */
-    height: auto;
-    display: block; /* Remove any default inline spacing */
-    margin: 0 auto; /* Center the logo within its container */
-}
-
-/* Responsive adjustments (example for smaller screens) */
-@media (max-width: 600px) {
-    .logo {
-        max-width: 95%;
-    }
-}
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="splash-container">
-        <img src="images/NuYouLogo.png" alt="Your Logo" class="logo">
-        <p  style="color: white;">Loading..</p>
+    <div class="container splash-container">
+        <img src="images/NuYouLogo.png" alt="Nuyou Logo" class="splash-logo">
+        <p style="margin-top: 20px; font-weight: bold;">Loading...</p>
     </div>
 
     <script>
     setTimeout(function() {
-     window.location.href = "makeup.html"; // Replace with your desired URL
-    }, 3000); // 3000 milliseconds = 3 seconds
-</script>
+     window.location.href = "makeup.html"; 
+    }, 3000); 
+    </script>
 </body>
 </html>

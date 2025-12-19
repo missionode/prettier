@@ -74,16 +74,54 @@ async function startCamera() {
     }
 }
 
+// --- CAMERA & LOOP LOGIC ---
+async function startCameraStream(facingMode) {
+    const constraints = {
+        video: {
+            facingMode: facingMode,
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+        }
+    };
+
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        video.srcObject = stream;
+        await new Promise(resolve => video.onloadedmetadata = resolve);
+        video.play();
+        return true;
+    } catch (err) {
+        console.error(`Error accessing ${facingMode} camera:`, err);
+        alert(`Could not access camera (${facingMode}). Please check permissions.`);
+        stopCamera();
+        return false;
+    }
+}
+
+async function processVideoFrame(solution) {
+    if (!isScanning) return;
+
+    if (solution) {
+        await solution.send({ image: video });
+    }
+
+    if (isScanning) {
+        requestAnimationFrame(() => processVideoFrame(solution));
+    }
+}
+
 function stopCamera() {
     isScanning = false; // Mark as stopped
 
     // Hide Full Screen Camera
     videoContainer.classList.remove('fullscreen');
 
-    if (camera) {
-        camera.stop();
-        camera = null;
+    // Stop MediaStream Tracks
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
     }
+
     if (solutions.faceMesh) {
         solutions.faceMesh.close();
         solutions.faceMesh = null;
@@ -119,17 +157,11 @@ async function startFaceScan(heightCm) {
 
     solutions.faceMesh.onResults((results) => onFaceResults(results, heightCm));
 
-    camera = new Camera(video, {
-        onFrame: async () => {
-            if (!isScanning) return; // Prevent sending if stopped
-            if (!solutions.faceMesh) return;
-            await solutions.faceMesh.send({ image: video });
-        },
-        width: 1280,
-        height: 720,
-    });
-
-    await camera.start();
+    // Start Front Camera
+    const success = await startCameraStream('user');
+    if (success) {
+        processVideoFrame(solutions.faceMesh);
+    }
 }
 
 function onFaceResults(results, heightCm) {
@@ -137,12 +169,26 @@ function onFaceResults(results, heightCm) {
 
     if (!results.multiFaceLandmarks || !results.multiFaceLandmarks.length) {
         // Draw video only to keep feedback alive
-        ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // Note: we don't need to draw video here, video element is visible behind canvas. 
+        // Just clearing canvas is enough to show raw feed.
         return;
     }
 
     // Draw landmarks
-    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Use drawing utils or custom drawing
+    // ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height); 
+    // ^ No need to draw image anymore since video tag is visible! Just draw landmarks.
+
+    if (results.multiFaceLandmarks) {
+        for (const landmarks of results.multiFaceLandmarks) {
+            drawConnectors(ctx, landmarks, FACEMESH_TESSELATION, { color: '#C0C0C070', lineWidth: 1 });
+            drawConnectors(ctx, landmarks, FACEMESH_RIGHT_EYE, { color: '#FF3030' });
+            drawConnectors(ctx, landmarks, FACEMESH_LEFT_EYE, { color: '#30FF30' });
+            drawConnectors(ctx, landmarks, FACEMESH_FACE_OVAL, { color: '#E0E0E0' });
+        }
+    }
 
     const landmarks = results.multiFaceLandmarks[0];
     const leftJaw = landmarks[234];
@@ -150,11 +196,15 @@ function onFaceResults(results, heightCm) {
     const chin = landmarks[152];
     const forehead = landmarks[10];
 
-    const faceWidth = distance(leftJaw, rightJaw);
-    const faceHeight = distance(forehead, chin);
+    // Helper for landmark distance
+    const dist = (p1, p2) => Math.hypot(p1.x - p2.x, p1.y - p2.y);
+
+    const faceWidth = dist(leftJaw, rightJaw);
+    const faceHeight = dist(forehead, chin);
     const ratio = faceWidth / faceHeight;
 
-    // Wait a few frames? For now instant result to close quickly
+    // Optimization: accumulate a few frames or just take one good one
+    // For now, let's stop immediately on first good detection
     stopCamera();
     reportFaceResults(ratio, heightCm);
 }
@@ -228,17 +278,11 @@ async function startBodyScan(heightCm) {
 
     solutions.pose.onResults((results) => onBodyResults(results, heightCm));
 
-    camera = new Camera(video, {
-        onFrame: async () => {
-            if (!isScanning) return;
-            if (!solutions.pose) return;
-            await solutions.pose.send({ image: video });
-        },
-        width: 1280,
-        height: 720,
-    });
-
-    await camera.start();
+    // Start BACK Camera (Environment)
+    const success = await startCameraStream('environment');
+    if (success) {
+        processVideoFrame(solutions.pose);
+    }
 }
 // Helper to calculate 3D or 2D distance. For ratios, 2D (x,y) is usually sufficient if facing camera.
 function distance(a, b) {
@@ -253,12 +297,12 @@ const REQUIRED_FRAMES = 30; // Scan for ~1-2 second (at 30fps) to ensure stabili
 function onBodyResults(results, heightCm) {
     if (!isScanning) return;
 
-    // Draw landmarks on canvas for user feedback (Fullscreen)
+    // Canvas Logic: Video is already visible behind. We only draw overlays.
     canvas.width = video.videoWidth;
     canvas.height = video.videoHeight;
     ctx.save();
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height);
+    // ctx.drawImage(results.image, 0, 0, canvas.width, canvas.height); // Removed: Video is visible as bg
 
     if (results.poseLandmarks) {
         drawConnectors(ctx, results.poseLandmarks, POSE_CONNECTIONS, { color: '#00FF00', lineWidth: 3 });
